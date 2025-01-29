@@ -1,32 +1,32 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import BannerBackground from "../../Assets/home-banner-background.png";
-import chair1 from "../../Assets/chair2.jpg";
 import { FiArrowRight } from "react-icons/fi";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import "./Style.css"
 
 const Home = () => {
+  const navigate = useNavigate(); // Initialize the navigate function
+
+  const handleLoginClick = () => {
+    navigate("/loginn"); // Navigate to the /login route when button is clicked
+  };
+
   return (
     <>
-      <Navbar />
-      <div className="home-container">
+      <div className="text-[#f9960e] font-mono text-5xl font-bold z-10 mt-10 ml-5"> Nirman Gati</div> 
+      <div className="home-container mt-[-40px] ml-11">
         <div className="home-banner-container">
           <div className="home-bannerImage-container">
             <img src={BannerBackground} alt="" />
           </div>
           <div className="home-text-section">
-            <h1 className="primary-heading">
-              Streamline Your Production Process
-            </h1>
+            <h1 className="primary-heading">Streamline Your Business</h1>
             <p className="primary-text">
               Track demand trends, and optimize production schedules. Manage
-              your operations efficiently and minimize waste, all from one
-              intuitive dashboard.
+              your operations efficiently, all from one intuitive dashboard.
               {/* <hr /> */}
             </p>
-            <h3>Login as Manufacturer</h3> <br />
-            <button className="secondary-button">
+            {/* <h3>Login as Manufacturer</h3> <br /> */}
+            <button onClick={handleLoginClick} className="secondary-button">
               Login Now <FiArrowRight />{" "}
             </button>
           </div>
@@ -39,7 +39,6 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <Footer/>
     </>
   );
 };

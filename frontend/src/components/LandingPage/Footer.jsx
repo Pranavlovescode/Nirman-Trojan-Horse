@@ -3,16 +3,15 @@ import { BsTwitter } from "react-icons/bs";
 import { SiLinkedin } from "react-icons/si";
 import { BsYoutube } from "react-icons/bs";
 import { FaFacebookF } from "react-icons/fa";
-import "./Style.css"
 
 const Footer = () => {
   return (
     <div className="footer-wrapper">
       <div className="footer-section-one">
-        <div className="footer-logo-container">
-          <h1 className="logoo">RentWize</h1>
+        <div className="p-6 footer-logo-container">
+          <h1 className="logoo">Nirmaan Gati</h1>
         </div>
-        <div className="footer-icons">
+        <div className="p-6 footer-icons flex">
           <a href="https://x.com/" target="_blank" rel="noopener noreferrer">
             <BsTwitter />
           </a>

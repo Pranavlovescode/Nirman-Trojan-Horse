@@ -1,15 +1,12 @@
 import React from "react";
 import ProfilePic from "../../Assets/john-doe-image.png";
 import { AiFillStar } from "react-icons/ai";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import "./Style.css"
 
 const Testimonial = () => {
-  return (<>
+  return (
     <div className="work-section-wrapper">
       <div className="work-section-top">
-        <p className="primary-subheading">Testimonial</p>
+        {/* <p className="primary-subheading">Testimonial</p> */}
         <h1 className="primary-heading">What They Are Saying</h1>
         <p className="primary-text">
           Hear from our satisfied customers about their experience with our
@@ -19,9 +16,8 @@ const Testimonial = () => {
       <div className="testimonial-section-bottom">
         <img src={ProfilePic} alt="" />
         <p>
-          "Renting furniture from "RentWize" was the best decision I made when
-          moving for my job. The process was quick, and the quality of the
-          furniture exceeded my expectations."
+          "Switching "Nirmaan Gati" from my traditional practices was the best decision to expand my business. The process was quick, and 
+          efficient helping me focus more on my core business and gain consumer insights."
         </p>
         <div className="testimonials-stars-container">
           <AiFillStar />
@@ -33,7 +29,6 @@ const Testimonial = () => {
         <h2>Akshadh</h2>
       </div>
     </div>
-    </>
   );
 };
 
