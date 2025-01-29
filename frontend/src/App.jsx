@@ -11,6 +11,7 @@ import Navbar from "./components/LandingPage/Navbar";
 import Testimonial from "./components/LandingPage/Testimonial";
 import Work from "./components/LandingPage/Work";
 import Loginn from "./components/LandingPage/Loginn";
+import RetailerDashboard from "./components/RetailerDashboard";
 
 function App() {
   return (
@@ -45,6 +46,16 @@ function App() {
               {" "}
               <Navbar />
               <ProducersDashboard />{" "}
+            </>
+          }
+        />
+        <Route
+          path="/retailer/dashboard"
+          element={
+            <>
+              {" "}
+              <Navbar />
+              <RetailerDashboard />{" "}
             </>
           }
         />

@@ -6,87 +6,60 @@ import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
 import { Button } from "./ui/button"
 
-// Mock data for initial render
-const initialMaterials = [
-  {
-    id: 1,
-    name: "Carbon Fiber",
-    description: "High-strength composite material made of carbon fibers",
-    price: 450,
-    quantity: 1000,
-    supplier: "TechFiber Industries",
-    lastUpdated: "2024-01-28",
-  },
-  {
-    id: 2,
-    name: "Aluminum Alloy 6061",
-    description: "Precipitation-hardened aluminum alloy with good mechanical properties",
-    price: 280,
-    quantity: 2500,
-    supplier: "MetalWorks Co.",
-    lastUpdated: "2024-01-27",
-  },
-  {
-    id: 3,
-    name: "Titanium Grade 5",
-    description: "High-strength titanium alloy with excellent corrosion resistance",
-    price: 890,
-    quantity: 500,
-    supplier: "TitaniumPro Supply",
-    lastUpdated: "2024-01-28",
-  },
-  {
-    id: 4,
-    name: "Steel 4140",
-    description: "Chrome-molybdenum alloy steel with high fatigue strength",
-    price: 320,
-    quantity: 1500,
-    supplier: "SteelMax Industries",
-    lastUpdated: "2024-01-26",
-  },
-]
+// Mock data for initial render (empty list now)
+const initialMaterials = []
 
-const material_ids=[]
-
-export default function ProducersDashboard() {
+export default function RetailerDashboard() {
   const [materials, setMaterials] = useState(initialMaterials)
   const [selectedMaterial, setSelectedMaterial] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [priceRange, setPriceRange] = useState([1000])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [materialDescription, setMaterialDescription] = useState("")
+  const [newMaterial, setNewMaterial] = useState({
+    name: "",
+    description: "",
+    price: 0,
+    quantity: 0,
+  })
+  const [finalPrice, setFinalPrice] = useState(0)
   const [filteredMaterials, setFilteredMaterials] = useState(initialMaterials)
-  const [confirmedMaterialIds, setConfirmedMaterialIds] = useState([])
 
-  const handleUpdateMaterial = (updatedMaterial) => {
-    console.log("Confirmed Material ID:", updatedMaterial.id); // Only print the id
-    // Remove the confirmed material from the materials list
-    material_ids.push(updatedMaterial.id)
-    const updatedMaterials = materials.filter((material) => material.id !== updatedMaterial.id)
+  const handleAddMaterial = () => {
+    const updatedMaterials = [...materials, { ...newMaterial, id: Date.now() }]
     setMaterials(updatedMaterials)
     setFilteredMaterials(updatedMaterials)
+    setNewMaterial({
+      name: "",
+      description: "",
+      price: 0,
+      quantity: 0,
+    })
+    setFinalPrice(0)
+  }
 
-    // Add material ID to the confirmed array using functional state update
-    setConfirmedMaterialIds((prev) => [...prev, updatedMaterial.id])
+  const handleMaterialChange = (e) => {
+    const { name, value } = e.target
+    setNewMaterial((prev) => {
+      const updatedMaterial = { ...prev, [name]: value }
+      if (updatedMaterial.price && updatedMaterial.quantity) {
+        updatedMaterial.finalPrice = updatedMaterial.price * updatedMaterial.quantity
+      }
+      setFinalPrice(updatedMaterial.finalPrice || 0)
+      return updatedMaterial
+    })
   }
 
   const handleFetchMaterials = () => {
     const filtered = materials.filter(
       (material) =>
-        material.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        material.description.toLowerCase().includes(materialDescription.toLowerCase()) &&
-        material.price <= priceRange[0],
+        material.name.toLowerCase().includes(newMaterial.name.toLowerCase()) &&
+        material.description.toLowerCase().includes(newMaterial.description.toLowerCase()) &&
+        material.price <= finalPrice,
     )
     setFilteredMaterials(filtered)
   }
 
-  const handlePurchase = () => {
-    // Get all confirmed materials by filtering materials based on confirmed IDs
-    const confirmedMaterials = filteredMaterials.filter((material) =>
-      confirmedMaterialIds.includes(material.id)
-    )
-    console.log("Confirmed Materials for Purchase:", confirmedMaterials)
-    console.log("Material IDs for Purchase:", material_ids)
+  const handleAcceptDeal = () => {
+    console.log("Accepted Material:", selectedMaterial)
+    setIsModalOpen(false)
   }
 
   return (
@@ -98,9 +71,10 @@ export default function ProducersDashboard() {
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Material Name</label>
               <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search materials..."
+                value={newMaterial.name}
+                onChange={handleMaterialChange}
+                name="name"
+                placeholder="Enter material name..."
                 className="border-gray-300 text-black"
               />
             </div>
@@ -108,32 +82,49 @@ export default function ProducersDashboard() {
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Description</label>
               <Textarea
-                value={materialDescription}
-                onChange={(e) => setMaterialDescription(e.target.value)}
+                value={newMaterial.description}
+                onChange={handleMaterialChange}
+                name="description"
                 placeholder="Enter material description..."
                 className="border-gray-300 text-black"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Maximum Price</label>
-              <div className="pt-4">
-                <Slider
-                  value={priceRange}
-                  onValueChange={setPriceRange}
-                  max={1000}
-                  step={10}
-                  className="[&_[role=slider]]:bg-[#f9960e]"
-                />
-              </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>₹0</span>
-                <span>₹{priceRange[0]}</span>
-              </div>
+              <label className="text-sm font-medium text-gray-700">Price per Unit</label>
+              <Input
+                value={newMaterial.price}
+                onChange={handleMaterialChange}
+                name="price"
+                type="number"
+                placeholder="Enter price..."
+                className="border-gray-300 text-black"
+              />
             </div>
 
-            <Button onClick={handleFetchMaterials} className="w-full bg-[#f9960e] text-white hover:bg-[#da850d]">
-              Fetch Materials
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Quantity</label>
+              <Input
+                value={newMaterial.quantity}
+                onChange={handleMaterialChange}
+                name="quantity"
+                type="number"
+                placeholder="Enter quantity..."
+                className="border-gray-300 text-black"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Final Price</label>
+              <Input
+                value={`₹${finalPrice}`}
+                disabled
+                className="border-gray-300 text-black"
+              />
+            </div>
+
+            <Button onClick={handleAddMaterial} className="w-full bg-[#f9960e] text-white hover:bg-[#da850d]">
+              Add Material
             </Button>
           </div>
         </div>
@@ -151,7 +142,7 @@ export default function ProducersDashboard() {
         {/* Materials List */}
         <div className="p-4">
           <div className="flex flex-col space-y-4">
-            {filteredMaterials.map((material) => (
+            {materials.map((material) => (
               <div key={material.id} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
                 <div className="flex justify-between items-start">
                   <div className="space-y-2 flex-grow">
@@ -180,18 +171,6 @@ export default function ProducersDashboard() {
             ))}
           </div>
         </div>
-
-        {/* Purchase Button */}
-        {confirmedMaterialIds.length > 0 && (
-          <div className="p-4">
-            <Button
-              onClick={handlePurchase}
-              className="w-full bg-[#f9960e] text-white hover:bg-[#da850d]"
-            >
-              Purchase Confirmed Materials
-            </Button>
-          </div>
-        )}
       </div>
 
       {selectedMaterial && (
@@ -202,7 +181,7 @@ export default function ProducersDashboard() {
             setSelectedMaterial(null)
           }}
           material={selectedMaterial}
-          onUpdate={handleUpdateMaterial}
+          onAcceptDeal={handleAcceptDeal}
         />
       )}
     </div>
@@ -210,7 +189,7 @@ export default function ProducersDashboard() {
 }
 
 // RawMaterialModal component
-export const RawMaterialModal = ({ isOpen, onClose, material, onUpdate }) => {
+export const RawMaterialModal = ({ isOpen, onClose, material, onAcceptDeal }) => {
   if (!isOpen || !material) return null
 
   return (
@@ -232,7 +211,6 @@ export const RawMaterialModal = ({ isOpen, onClose, material, onUpdate }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left column: Material Details */}
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-medium text-gray-800">Description</h3>
@@ -255,38 +233,14 @@ export const RawMaterialModal = ({ isOpen, onClose, material, onUpdate }) => {
               <p className="text-sm text-gray-600">{material.lastUpdated}</p>
             </div>
           </div>
-
-          {/* Right column: Images */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-800 mb-2">Images</h3>
-            <div className="h-64 overflow-y-auto space-y-4 pr-2">
-              <img
-                src="https://4.imimg.com/data4/CB/YF/ANDROID-60760157/product-250x250.jpeg"
-                alt="Material 1"
-                className="w-full object-cover rounded-lg"
-              />
-              <img
-                src="https://s.alicdn.com/@sc04/kf/He05f249b7d4c42c68c58014265e945d53.jpg_300x300.jpg"
-                alt="Material 2"
-                className="w-full object-cover rounded-lg"
-              />
-            </div>
-          </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex space-x-4 mt-6">
           <Button onClick={onClose} className="flex-1 border-orange-200 bg-white text-gray-700 hover:bg-gray-400 hover:text-white">
-            Close
+            Cancel
           </Button>
-          <Button
-            onClick={() => {
-              onClose()
-              onUpdate({ id: material.id }) // Only send the material's id when confirming
-            }}
-            className="flex-1 bg-[#f9960e] text-white hover:bg-[#da850d]"
-          >
-            Confirm
+          <Button onClick={onAcceptDeal} className="flex-1 bg-[#f9960e] text-white hover:bg-[#da850d]">
+            Accept Deal
           </Button>
         </div>
       </div>

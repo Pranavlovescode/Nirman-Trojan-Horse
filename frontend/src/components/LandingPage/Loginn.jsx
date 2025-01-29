@@ -64,7 +64,7 @@ function Loginn() {
         toast.success("User logged in successfully");
         setSignInEmail("");
         setSignInPassword("");
-        navigate('/dashboard/reads');
+        navigate("/dashboard/reads");
       } else if (response.status === 401) {
         toast.error("Invalid credentials");
       } else {
@@ -120,7 +120,7 @@ function Loginn() {
       {/* Sign In Form */}
       <div className="form-container sign-in">
         <form onSubmit={handleSignIn}>
-          <h1>Sign In</h1>
+          <h1 className="text-black text-2xl font-bold">Sign In</h1>
           <div className="social-icons">
             <NavLink to="#" className="icon">
               <i className="fa-brands fa-google-plus-g"></i>
@@ -210,6 +210,7 @@ function Loginn() {
 
           <select
             value={signUpTypeOfManufacturer}
+            className="bg-white border border-orange-200 w-[19rem] mt-2 p-1 mb-1 text-black"
             onChange={(e) => setSignUpTypeOfManufacturer(e.target.value)}
             required
           >
@@ -231,19 +232,21 @@ function Loginn() {
       <div className="toggle-container">
         <div className="toggle">
           <div className="toggle-panel toggle-left">
-            <h1>Welcome Back!</h1>
-            <p>Enter your personal details to use all of the site’s features</p>
-            <button className="hidden" id="login" ref={loginBtnRef}>
+            <h1 className="text-xl">Welcome Back!</h1>
+            <p className="text-black">
+              Enter your personal details to use all of the site’s features
+            </p>
+            <button className="text-black" id="login" ref={loginBtnRef}>
               Sign In
             </button>
           </div>
           <div className="toggle-panel toggle-right">
-            <h1>Hello, Friend!</h1>
-            <p>
+            <h1 className="text-xl">Don't Have an Account?</h1>
+            <p className="text-black">
               Register with your personal details to use all of the site’s
               features
             </p>
-            <button className="hidden" id="register" ref={registerBtnRef}>
+            <button className="border-2 border-red-800" id="register" ref={registerBtnRef}>
               Sign Up
             </button>
           </div>
