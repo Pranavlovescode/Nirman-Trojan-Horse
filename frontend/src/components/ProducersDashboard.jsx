@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Slider } from "./ui/slider"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
 import { Button } from "./ui/button"
-
+import axios from "axios"
 // Mock data for initial render
 const initialMaterials = [
   {
@@ -46,21 +46,34 @@ const initialMaterials = [
   },
 ]
 
-const material_ids=[]
+const material_ids = []
 
 export default function ProducersDashboard() {
   const [materials, setMaterials] = useState(initialMaterials)
-  const [selectedMaterial, setSelectedMaterial] = useState(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [priceRange, setPriceRange] = useState([1000])
   const [searchTerm, setSearchTerm] = useState("")
   const [materialDescription, setMaterialDescription] = useState("")
   const [filteredMaterials, setFilteredMaterials] = useState(initialMaterials)
   const [confirmedMaterialIds, setConfirmedMaterialIds] = useState([])
+  const [deals, setDeals] = useState([]);
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchDeals = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/deals");
+        setDeals(response.data.deals);
+      } catch (error) {
+        console.error("Error fetching deals:", error);
+      }
+    };
+
+    fetchDeals();
+  }, []);
 
   const handleUpdateMaterial = (updatedMaterial) => {
     console.log("Confirmed Material ID:", updatedMaterial.id); // Only print the id
-    // Remove the confirmed material from the materials list
     material_ids.push(updatedMaterial.id)
     const updatedMaterials = materials.filter((material) => material.id !== updatedMaterial.id)
     setMaterials(updatedMaterials)
@@ -70,7 +83,7 @@ export default function ProducersDashboard() {
     setConfirmedMaterialIds((prev) => [...prev, updatedMaterial.id])
   }
 
-  const handleFetchMaterials = async() => {
+  const handleFetchMaterials = async () => {
     // const filtered = materials.filter(
     //   (material) =>
     //     material.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -79,14 +92,14 @@ export default function ProducersDashboard() {
     // )
     // setFilteredMaterials(filtered)
     try {
-      const response = await axios.post("http://localhost:3000/api/materials", {
-        materialName: searchTerm,
+      const response = await axios.post("http://localhost:3000/ai/get-data-from-manufacturer", {
+        name: searchTerm,
         description: materialDescription,
-        maxPrice: priceRange[0],
+        price: priceRange[0],
       });
 
       console.log("Response:", response.data);
-      alert("Materials fetched successfully!");
+      alert("Regarding deal we will know in shortly!");
     } catch (error) {
       console.error("Error fetching materials:", error);
       alert("Failed to fetch materials.");
@@ -134,7 +147,7 @@ export default function ProducersDashboard() {
                 <Slider
                   value={priceRange}
                   onValueChange={setPriceRange}
-                  max={1000}
+                  max={1000000}
                   step={10}
                   className="[&_[role=slider]]:bg-[#f9960e]"
                 />
@@ -164,19 +177,19 @@ export default function ProducersDashboard() {
         {/* Materials List */}
         <div className="p-4">
           <div className="flex flex-col space-y-4">
-            {filteredMaterials.map((material) => (
-              <div key={material.id} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+            {deals.map((material) => (
+              <div key={material._id} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
                 <div className="flex justify-between items-start">
                   <div className="space-y-2 flex-grow">
-                    <h3 className="text-lg font-medium text-[#f9960e]">{material.name}</h3>
+                    <h3 className="text-lg font-medium text-[#f9960e]">{material.item}</h3>
                     <p className="text-sm text-gray-600">{material.description}</p>
                     <div className="flex items-center text-sm">
                       <span className="text-gray-800 font-medium">Price:</span>
-                      <span className="text-gray-800 font-medium ml-2">₹{material.price}</span>
+                      <span className="text-gray-800 font-medium ml-2">₹{material.agreed_price}</span>
                     </div>
                     <div className="flex items-center text-sm">
-                      <span className="text-gray-800 font-medium">Quantity:</span>
-                      <span className="text-gray-800 font-medium ml-2">{material.quantity} units</span>
+                      <span className="text-gray-800 font-medium">Status:</span>
+                      <span className="text-gray-800 font-medium ml-2">{material.status} units</span>
                     </div>
                   </div>
                   <button
@@ -247,26 +260,26 @@ export const RawMaterialModal = ({ isOpen, onClose, material, onUpdate }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left column: Material Details */}
           <div className="space-y-4">
-            <div>
+            {/* <div>
               <h3 className="text-lg font-medium text-gray-800">Description</h3>
               <p className="text-sm text-gray-600">{material.description}</p>
-            </div>
+            </div> */}
             <div>
               <h3 className="text-lg font-medium text-gray-800">Price</h3>
-              <p className="text-sm text-gray-600">₹{material.price}</p>
+              <p className="text-sm text-gray-600">₹{material.agreed_price}</p>
             </div>
-            <div>
+            {/* <div>
               <h3 className="text-lg font-medium text-gray-800">Quantity</h3>
               <p className="text-sm text-gray-600">{material.quantity} units</p>
-            </div>
+            </div> */}
             <div>
               <h3 className="text-lg font-medium text-gray-800">Supplier</h3>
-              <p className="text-sm text-gray-600">{material.supplier}</p>
+              <p className="text-sm text-gray-600">{material.from_message}</p>
             </div>
-            <div>
+            {/* <div>
               <h3 className="text-lg font-medium text-gray-800">Last Updated</h3>
               <p className="text-sm text-gray-600">{material.lastUpdated}</p>
-            </div>
+            </div> */}
           </div>
 
           {/* Right column: Images */}
@@ -306,3 +319,82 @@ export const RawMaterialModal = ({ isOpen, onClose, material, onUpdate }) => {
     </div>
   )
 }
+
+
+
+
+
+// <div className="flex-1">
+//         {/* Header */}
+//         <div className="border-b border-gray-200 bg-white p-4 shadow-sm">
+//           <div className="flex space-x-4">
+//             <button className="text-[#f9960e] border-none hover:text-[#da850d] font-medium">
+//               Raw Materials
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Materials List */}
+//         <div className="p-4">
+//           <div className="flex flex-col space-y-4">
+//             {deals.map((material) => (
+//               <div key={material._id} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+//                 <div className="flex justify-between items-start">
+//                   <div className="space-y-2 flex-grow">
+//                     <h3 className="text-lg font-medium text-[#f9960e]">{material.item}</h3>
+//                     <p className="text-sm text-gray-600">{material.description}</p>
+//                     <div className="flex items-center text-sm">
+//                       <span className="text-gray-800 font-medium">Price:</span>
+//                       <span className="text-gray-800 font-medium ml-2">₹{material.agreed_price}</span>
+//                     </div>
+//                     <div className="flex items-center text-sm">
+//                       <span className="text-gray-800 font-medium">Status:</span>
+//                       <span className="text-gray-800 font-medium ml-2">{material.status} units</span>
+//                     </div>
+//                   </div>
+//                   <button
+//                     onClick={() => {
+//                       setSelectedMaterial(material);
+//                       setIsModalOpen(true);
+//                     }}
+//                     className="ml-4 px-4 py-2 bg-[#f9960e] text-white rounded hover:bg-[#da850d] transition-colors"
+//                   >
+//                     View Details
+//                   </button>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+
+//         {/* Purchase Button */}
+//         {deals.length > 0 && (
+//           <div className="p-4">
+//             <button
+//               onClick={() => alert("Purchase functionality here!")}
+//               className="w-full bg-[#f9960e] text-white hover:bg-[#da850d] rounded py-2"
+//             >
+//               Purchase Deals
+//             </button>
+//           </div>
+//         )}
+
+//         {/* Modal for Viewing Details */}
+//         {isModalOpen && selectedMaterial && (
+//           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//             <div className="bg-white p-6 rounded-lg shadow-lg">
+//               <h3 className="text-xl font-medium text-[#f9960e]">{selectedMaterial.item}</h3>
+//               <p className="text-gray-600">{selectedMaterial.description}</p>
+//               <p className="font-medium">Price: ₹{selectedMaterial.agreed_price}</p>
+//               <p className="font-medium">Status: {selectedMaterial.status} units</p>
+//               <button
+//                 onClick={() => setIsModalOpen(false)}
+//                 className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+//               >
+//                 Close
+//               </button>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
