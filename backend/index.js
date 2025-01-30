@@ -57,7 +57,7 @@ app.use(cors(
 ));
 
 // Routes
-app.use("/ai/get-data-from-manufacturer", manufacturerRoute);
+app.use("/ai", manufacturerRoute);
 app.use("/api/test", TestRouter);
 app.use("/api/login", LoginRouter);
 app.use("/api/signup", SignupRouter);

@@ -188,6 +188,20 @@ def sendMsgFromShopkeeper():
 #     return jsonify({"response": ai_response.content, "message": "Vendor negotiation ongoing."})
 
 
+collection = db.get_collection('deals')
+
+@app.route('/api/deals', methods=['GET'])
+def get_all_deals():
+    try:
+        deals = list(collection.find({}))
+        if not deals:
+            return jsonify({"message": "No deals found"}), 404
+        for deal in deals:
+            deal["_id"] = str(deal["_id"])
+            print(deal)
+        return jsonify({"success": True, "deals": deals}), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 

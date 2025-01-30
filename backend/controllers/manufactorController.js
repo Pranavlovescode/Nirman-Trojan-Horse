@@ -1,24 +1,22 @@
-const Seller = require("../models/seller.js");
+const axios = require('axios');
 const { sendSMS } = require("../send.js");
 const getData = async(req, res)=>{
-    // const {name,price} = req.body()
-    /*Just for testing */
-    const name = "wood"
-    const price = 32000
+    const {name, price, description} = req.body;
     const reduced_amount = price - (price*0.10)
     const message = `I am looking to purchase ${name} within a budget of ₹${reduced_amount}. Please provide your price quote.`;
     try {
-        const sellers = await Seller.find({ 'item.name': name });
-        if (sellers.length === 0) {
-            return res.status(404).json({ message: 'No sellers found with that item' });
-        }
-        const sellerPhones = sellers.map(seller => ({
-            phone: seller.phone,
-            name: seller.name,  
-        }));
+        // const sellers = await Seller.find({ 'item.name': name });
+        // if (sellers.length === 0) {
+        //     return res.status(404).json({ message: 'No sellers found with that item' });
+        // }
+        const sellerPhones = [{
+              "phone": "whatsapp:+917999505967",
+              "name": "Rahul Traders"
+            },
+        ]
         for (const vendor of sellerPhones) {
             try {
-                await sendSMS(message, vendor);
+                await sendSMS(message, vendor.phone);
                 console.log(`Message sent to ${vendor.phone}`);
                 const response = await axios.post("http://127.0.0.1:5000/sendMsgFromShopkeeper", {
                 input: message,
@@ -37,4 +35,6 @@ const getData = async(req, res)=>{
         return res.status(500).json({ message: 'Server error', error: err.message });
     }
 }
+
+
 module.exports = {getData}
