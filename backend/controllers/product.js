@@ -7,7 +7,8 @@ const RawMaterial = require("../models/raw_material");
 const createNewProduct = async (req, res) => {
   const {
     name,
-    price,
+    min_price,
+    max_price,
     quantity,
     manufacturer,
     raw_materials,
@@ -15,7 +16,8 @@ const createNewProduct = async (req, res) => {
   } = req.body;
   if (
     !name ||
-    !price ||
+    !min_price ||
+    !max_price ||
     !quantity ||
     !manufacturer ||
     !raw_materials
@@ -37,7 +39,8 @@ const createNewProduct = async (req, res) => {
 
   const newProduct = new Product({
     name,
-    price,
+    max_price,
+    min_price,
     quantity,
     raw_materials: raw_materials_array.map((raw_material) => raw_material._id),
     manufacturer: manufacturerExists,

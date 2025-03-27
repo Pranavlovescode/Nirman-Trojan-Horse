@@ -165,7 +165,7 @@ router.get("/retailer/negotiations", auth, async (req, res) => {
       .populate("productId", "name price images")
       .populate("customerId", "name email");
 
-    res.json(negotiations);
+    res.status(200).json(negotiations);
   } catch (error) {
     console.error("Error fetching retailer negotiations:", error);
     res.status(500).json({ error: "Server error" });

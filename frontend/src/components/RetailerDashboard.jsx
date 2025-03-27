@@ -22,8 +22,8 @@ const RetailerDashboard = () => {
   useEffect(() => {
     fetchNegotiations();
     
-    // Set up auto-refresh every 30 seconds
-    const interval = setInterval(fetchNegotiations, 30000);
+    // Set up auto-refresh every 10 seconds
+    const interval = setInterval(fetchNegotiations, 10000);
     setRefreshInterval(interval);
     
     return () => {
@@ -36,7 +36,7 @@ const RetailerDashboard = () => {
       setLoading(true);
       const response = await axios.get(`${import.meta.env.VITE_BACKEND}/api/negotiate/retailer/negotiations`);
       setNegotiations(response.data);
-      
+      console.log("negotiations", response.data);
       // If we have a selected negotiation, refresh its data
       if (selectedNegotiation) {
         const updatedNegotiation = response.data.find(n => n._id === selectedNegotiation._id);

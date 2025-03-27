@@ -5,7 +5,11 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    price: {
+    min_price: {
+      type: Number,
+      required: true,
+    },
+    max_price: {
       type: Number,
       required: true,
     },
