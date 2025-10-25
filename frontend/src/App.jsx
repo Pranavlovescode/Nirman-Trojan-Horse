@@ -13,6 +13,7 @@ import Work from "./components/LandingPage/Work";
 import Loginn from "./components/LandingPage/Loginn";
 import RetailerDashboard from "./components/RetailerDashboard";
 import UserDashboard from "./components/UserDashboard";
+import Chatbot from "./components/ChatBot/Chatbot";
 
 function App() {
   return (
@@ -74,6 +75,7 @@ function App() {
 
         <Route path="*" element={<Loginn />} />
       </Routes>
+      <Chatbot />
     </Router>
   );
 }
