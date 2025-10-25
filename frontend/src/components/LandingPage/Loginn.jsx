@@ -79,79 +79,65 @@ function Loginn() {
     }
   };
 
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    try {
-      const formData = {
-        name: signUpName,
-        email: signUpEmail,
-        password: signUpPassword,
-        phone_number: signUpPhone,
-        address: signUpAddress,
-        manufacturer_type: signUpTypeOfManufacturer,
-      };
-      console.log("form data", formData);
+ const handleSignUp = async (e) => {
+  e.preventDefault();
 
-      if(signUpType === "Manufacturer"){
-        const response = await axios.post(
-          `${import.meta.env.VITE_BACKEND}/api/signup`,
-          {
-            name: signUpName,
-            email: signUpEmail,
-            password: signUpPassword,
-            phone_number: signUpPhone,
-            address: signUpAddress,
-            manufacturer_type: signUpTypeOfManufacturer,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
-        console.log(response.data);
-        toast.success("Manufacturer created successfully");
-        setSignUpEmail("");
-        setSignUpPassword("");
-        setSignUpPhone("");
-        setSignUpAddress("");
-        setSignUpTypeOfManufacturer("");
-        setSignUpName("");
-        navigate("/manufacturer/dashboard"); 
-      } 
-      else if(signUpType === "Buyer"){
-        const response = await axios.post(`${import.meta.env.VITE_BACKEND}/api/user/register` || 'http://localhost:3000/api/user/register',{
-          name: signUpName,
-          email: signUpEmail,
-          password: signUpPassword,
-          phone_number: signUpPhone,
-          address: signUpAddress,
-        },{
-          headers:{
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        })
-        console.log(response.data);
-        toast.success("Buyer created successfully");
-        setSignUpEmail("");
-        setSignUpPassword("");
-        setSignUpPhone("");
-        setSignUpAddress("");
-        setSignUpName("");
-        setSignUpTypeOfManufacturer("");
-        navigate("/retailer/dashboard");
-      }else{
-        navigate("/");
-      }
+  try {
+    const formData = {
+      name: signUpName,
+      email: signUpEmail,
+      password: signUpPassword,
+      phone_number: signUpPhone,
+      address: signUpAddress,
+      ...(signUpType === "Manufacturer" && { manufacturer_type: signUpTypeOfManufacturer }),
+    };
 
-      
-    } catch (error) {
-      console.error("Error during signup:", error);
-      toast.error("Internal Server Error");
+    console.log("Form data:", formData);
+
+    // Determine API endpoint and success message based on user type
+    let endpoint = "";
+    let successMessage = "";
+    let redirectRoute = "";
+
+    if (signUpType === "Manufacturer") {
+      endpoint = `${import.meta.env.VITE_BACKEND}/api/signup`;
+      successMessage = "Manufacturer created successfully";
+      redirectRoute = "/manufacturer/dashboard";
+    } else if (signUpType === "Buyer") {
+      endpoint = `${import.meta.env.VITE_BACKEND}/api/user/register`;
+      successMessage = "Buyer created successfully";
+      redirectRoute = "/retailer/dashboard";
+    } else {
+      navigate("/");
+      return;
     }
-  };
+
+    // Send signup request
+    const response = await axios.post(endpoint, formData, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
+
+    console.log(response.data);
+    toast.success(successMessage);
+
+    // Reset form fields
+    setSignUpName("");
+    setSignUpEmail("");
+    setSignUpPassword("");
+    setSignUpPhone("");
+    setSignUpAddress("");
+    setSignUpTypeOfManufacturer("");
+
+    // Navigate to the appropriate dashboard
+    navigate(redirectRoute);
+
+  } catch (error) {
+    console.error("Error during signup:", error);
+    toast.error("Internal Server Error");
+  }
+};
+
 
   return (
     <div className="container logiin mx-auto" ref={containerRef}>
