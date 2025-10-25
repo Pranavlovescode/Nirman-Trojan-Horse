@@ -118,10 +118,9 @@ function Loginn() {
         setSignUpAddress("");
         setSignUpTypeOfManufacturer("");
         setSignUpName("");
-        navigate("/manufacturer/dashboard");
-      }
-
-      if(signUpType === "Buyer"){
+        navigate("/manufacturer/dashboard"); 
+      } 
+      else if(signUpType === "Buyer"){
         const response = await axios.post(`${import.meta.env.VITE_BACKEND}/api/user/register` || 'http://localhost:3000/api/user/register',{
           name: signUpName,
           email: signUpEmail,
@@ -143,6 +142,8 @@ function Loginn() {
         setSignUpName("");
         setSignUpTypeOfManufacturer("");
         navigate("/retailer/dashboard");
+      }else{
+        navigate("/");
       }
 
       
