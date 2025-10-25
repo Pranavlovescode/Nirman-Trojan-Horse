@@ -1,18 +1,42 @@
-import React, { useState } from "react";
-import { Groq } from "@groq/groq-sdk";
+import React, { useState, useRef, useEffect } from "react";
+import { Send, Bot, User, Sparkles } from "lucide-react";
 
 const Chatbot = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    { text: "Hello! I'm your AI assistant. How can I help you today?", sender: "bot" }
+  ]);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage = { text: input, sender: "user" };
-    setMessages([...messages, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setInput("");
+    setIsTyping(true);
 
     try {
+      // Simulated API call - replace with your actual Groq API call
+      setTimeout(() => {
+        const botMessage = {
+          text: "This is a demo response. Replace this with your actual Groq API integration!",
+          sender: "bot",
+        };
+        setMessages(prev => [...prev, botMessage]);
+        setIsTyping(false);
+      }, 1000);
+
+      /* Uncomment and use your actual Groq API call:
       const response = await Groq.chat({
         messages: [{ role: "user", content: input }],
       });
@@ -22,53 +46,126 @@ const Chatbot = () => {
         sender: "bot",
       };
 
-      setMessages((prev) => [...prev, userMessage, botMessage]);
+      setMessages(prev => [...prev, botMessage]);
+      setIsTyping(false);
+      */
     } catch (error) {
-      console.error("GROQ API error:", error);
-      const errorMessage = { text: "Oops! Something went wrong.", sender: "bot" };
-      setMessages((prev) => [...prev, userMessage, errorMessage]);
+      console.error("API error:", error);
+      const errorMessage = { 
+        text: "I apologize, but I encountered an error. Please try again.", 
+        sender: "bot" 
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsTyping(false);
     }
   };
 
   return (
-    <div className="fixed bottom-5 right-5 w-80 bg-white shadow-lg rounded-xl flex flex-col overflow-hidden z-50">
-      <div className="bg-blue-600 text-white p-3 font-semibold">Chat with AI</div>
+    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white shadow-2xl rounded-2xl flex flex-col overflow-hidden z-50 border border-gray-200">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-4 flex items-center gap-3">
+        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+          <Sparkles className="w-5 h-5" />
+        </div>
+        <div>
+          <h3 className="font-semibold text-lg">AI Assistant</h3>
+          <p className="text-xs text-white/80">Online</p>
+        </div>
+      </div>
 
-      <div className="flex-1 p-3 overflow-y-auto max-h-96">
+      {/* Messages Container */}
+      <div className="flex-1 p-4 overflow-y-auto bg-gradient-to-b from-gray-50 to-white space-y-4">
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`mb-2 flex ${
-              msg.sender === "user" ? "justify-end" : "justify-start"
-            }`}
+            className={`flex gap-3 ${
+              msg.sender === "user" ? "flex-row-reverse" : "flex-row"
+            } animate-fade-in`}
           >
+            {/* Avatar */}
             <div
-              className={`px-3 py-2 rounded-lg max-w-xs break-words ${
-                msg.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-900"
+              className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                msg.sender === "user"
+                  ? "bg-gradient-to-br from-violet-500 to-indigo-500"
+                  : "bg-gradient-to-br from-gray-700 to-gray-900"
               }`}
             >
-              {msg.text}
+              {msg.sender === "user" ? (
+                <User className="w-4 h-4 text-white" />
+              ) : (
+                <Bot className="w-4 h-4 text-white" />
+              )}
+            </div>
+
+            {/* Message Bubble */}
+            <div
+              className={`px-4 py-3 rounded-2xl max-w-[75%] break-words shadow-sm ${
+                msg.sender === "user"
+                  ? "bg-gradient-to-br from-violet-500 to-indigo-500 text-white rounded-tr-sm"
+                  : "bg-white text-gray-800 border border-gray-200 rounded-tl-sm"
+              }`}
+            >
+              <p className="text-sm leading-relaxed">{msg.text}</p>
             </div>
           </div>
         ))}
+
+        {/* Typing Indicator */}
+        {isTyping && (
+          <div className="flex gap-3 animate-fade-in">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-gray-700 to-gray-900">
+              <Bot className="w-4 h-4 text-white" />
+            </div>
+            <div className="px-4 py-3 rounded-2xl bg-white border border-gray-200 rounded-tl-sm">
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex border-t border-gray-300">
-        <input
-          className="flex-1 p-2 outline-none"
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        />
-        <button
-          onClick={handleSend}
-          className="bg-blue-600 text-white px-4 py-2 font-semibold hover:bg-blue-700 transition"
-        >
-          Send
-        </button>
+      {/* Input Area */}
+      <div className="p-4 bg-white border-t border-gray-200">
+        <div className="flex gap-2 items-end">
+          <input
+            className="flex-1 px-4 py-3 bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 focus:bg-white transition-all text-sm"
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message..."
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim()}
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-3 rounded-xl hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            <Send className="w-5 h-5" />
+          </button>
+        </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
