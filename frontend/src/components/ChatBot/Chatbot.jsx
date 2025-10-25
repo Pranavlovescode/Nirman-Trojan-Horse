@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Sparkles } from "lucide-react";
+import { Send, Bot, User, Sparkles, X } from "lucide-react";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
-    { text: "Hello! I'm your AI assistant. How can I help you today?", sender: "bot" }
+    { text: "Hello! I'm your AI assistant. How can I help you today?", sender: "bot" },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const messagesEndRef = useRef(null);
 
+  // Scroll chat to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -17,6 +19,7 @@ const Chatbot = () => {
     scrollToBottom();
   }, [messages, isTyping]);
 
+  // Send message
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -26,61 +29,76 @@ const Chatbot = () => {
     setIsTyping(true);
 
     try {
-      // Simulated API call - replace with your actual Groq API call
-      setTimeout(() => {
-        const botMessage = {
-          text: "This is a demo response. Replace this with your actual Groq API integration!",
-          sender: "bot",
-        };
-        setMessages(prev => [...prev, botMessage]);
-        setIsTyping(false);
-      }, 1000);
+   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+            model: "llama-3.3-70b-versatile", // Replace with the model you want
+            messages: [{ role: "user", content: input }],
+        }),
+        });
 
-      /* Uncomment and use your actual Groq API call:
-      const response = await Groq.chat({
-        messages: [{ role: "user", content: input }],
-      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const botMessage = {
-        text: response.choices[0].message.content,
+      const data = await response.json();
+
+      const botMessageText =
+        data.choices?.[0]?.message?.content || "Sorry, I didn't get a response from the AI.";
+
+      const botMessage = { text: botMessageText, sender: "bot" };
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error("GROQ API error:", error);
+      const errorMessage = {
+        text: "I apologize, but I encountered an error. Please try again.",
         sender: "bot",
       };
-
-      setMessages(prev => [...prev, botMessage]);
-      setIsTyping(false);
-      */
-    } catch (error) {
-      console.error("API error:", error);
-      const errorMessage = { 
-        text: "I apologize, but I encountered an error. Please try again.", 
-        sender: "bot" 
-      };
       setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
     }
   };
 
+  if (!isOpen) {
+    return (
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-3 rounded-full shadow-lg hover:scale-105 transition"
+        >
+          Chat
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white shadow-2xl rounded-2xl flex flex-col overflow-hidden z-50 border border-gray-200">
       {/* Header */}
-      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-4 flex items-center gap-3">
-        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-          <Sparkles className="w-5 h-5" />
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">AI Assistant</h3>
+            <p className="text-xs text-white/80">Online</p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-semibold text-lg">AI Assistant</h3>
-          <p className="text-xs text-white/80">Online</p>
-        </div>
+        <button onClick={() => setIsOpen(false)}>
+          <X className="w-5 h-5 hover:text-gray-200 transition" />
+        </button>
       </div>
 
-      {/* Messages Container */}
+      {/* Messages */}
       <div className="flex-1 p-4 overflow-y-auto bg-gradient-to-b from-gray-50 to-white space-y-4">
-        {messages.map((msg, index) => (
+        {messages.map((msg, idx) => (
           <div
-            key={index}
-            className={`flex gap-3 ${
-              msg.sender === "user" ? "flex-row-reverse" : "flex-row"
-            } animate-fade-in`}
+            key={idx}
+            className={`flex gap-3 ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"} animate-fade-in`}
           >
             {/* Avatar */}
             <div
@@ -90,11 +108,7 @@ const Chatbot = () => {
                   : "bg-gradient-to-br from-gray-700 to-gray-900"
               }`}
             >
-              {msg.sender === "user" ? (
-                <User className="w-4 h-4 text-white" />
-              ) : (
-                <Bot className="w-4 h-4 text-white" />
-              )}
+              {msg.sender === "user" ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
             </div>
 
             {/* Message Bubble */}
@@ -118,9 +132,9 @@ const Chatbot = () => {
             </div>
             <div className="px-4 py-3 rounded-2xl bg-white border border-gray-200 rounded-tl-sm">
               <div className="flex gap-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
             </div>
           </div>
@@ -129,7 +143,7 @@ const Chatbot = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
+      {/* Input */}
       <div className="p-4 bg-white border-t border-gray-200">
         <div className="flex gap-2 items-end">
           <input
@@ -150,21 +164,13 @@ const Chatbot = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      {/* Fade animation */}
+      <style>{`
         @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out;
-        }
+        .animate-fade-in { animation: fade-in 0.3s ease-out; }
       `}</style>
     </div>
   );
