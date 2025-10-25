@@ -100,7 +100,6 @@ const Chatbot = () => {
             key={idx}
             className={`flex gap-3 ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"} animate-fade-in`}
           >
-            {/* Avatar */}
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                 msg.sender === "user"
@@ -111,7 +110,6 @@ const Chatbot = () => {
               {msg.sender === "user" ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
             </div>
 
-            {/* Message Bubble */}
             <div
               className={`px-4 py-3 rounded-2xl max-w-[75%] break-words shadow-sm ${
                 msg.sender === "user"
