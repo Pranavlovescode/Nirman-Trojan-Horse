@@ -118,6 +118,7 @@ function Loginn() {
         setSignUpAddress("");
         setSignUpTypeOfManufacturer("");
         setSignUpName("");
+        navigate("/manufacturer/dashboard");
       }
 
       if(signUpType === "Buyer"){
@@ -141,6 +142,7 @@ function Loginn() {
         setSignUpAddress("");
         setSignUpName("");
         setSignUpTypeOfManufacturer("");
+        navigate("/retailer/dashboard");
       }
 
       
